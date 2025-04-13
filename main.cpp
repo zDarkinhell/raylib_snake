@@ -9,6 +9,11 @@ const int screen_heigth = 750;
 float cellSize = 30.0f;
 float cellCount = 25.0f;
 
+bool renderGrid = false;
+
+Color green = {173, 204, 96, 255};
+Color darkGreen = {43, 51, 24, 255};
+
 
 
 int main()
@@ -30,7 +35,7 @@ int main()
             {
                 //Defining a rectangle to use inside the DrawRectangleRounded function.
                 Rectangle rectangle = Rectangle(body[i].x * cellSize, body[i].y * cellSize, cellSize, cellSize);
-                DrawRectangleRounded(rectangle, 0.5, 1, DARKGREEN);
+                DrawRectangleRounded(rectangle, 0.5, 1, darkGreen);
             }
         }
 
@@ -104,7 +109,7 @@ int main()
 
         //Begin screen drawing
         BeginDrawing();
-        ClearBackground(WHITE);
+        ClearBackground(green);
 
         //Event handling
 
@@ -114,14 +119,14 @@ int main()
         //Drawing
         food.Draw();   
         snake.Draw();
-
-        for(int i = 0; i < cellCount; i++)
+        if(renderGrid == true)
         {
-            DrawLine(0, i * cellSize, cellCount * cellSize, i * cellSize, BLACK);
-            DrawLine(i * cellSize, 0, i * cellSize, cellCount * cellSize, BLACK);
-        }
-        
-
+            for(int i = 0; i < cellCount; i++)
+            {
+                DrawLine(0, i * cellSize, cellCount * cellSize, i * cellSize, BLACK);
+                DrawLine(i * cellSize, 0, i * cellSize, cellCount * cellSize, BLACK);
+            }
+        }   
         //End screen drawing
         EndDrawing();
     }
