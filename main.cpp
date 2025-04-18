@@ -1,5 +1,8 @@
 #include <raylib.h>
+#include <raymath.h>
 #include <deque>
+#include <iostream>
+
 
 const int screen_width = 750;
 const int screen_heigth = 750;
@@ -14,6 +17,23 @@ bool renderGrid = false;
 Color green = {173, 204, 96, 255};
 Color darkGreen = {43, 51, 24, 255};
 
+void await(float time)
+{
+    int timeDifference = GetTime();
+    bool goOut = false;
+
+    while(goOut = false)
+    {
+        float b = GetTime();
+
+        if(b - timeDifference >= time)
+        {
+            timeDifference = GetTime();
+            goOut = true;
+        }
+    }
+}
+
 
 
 int main()
@@ -27,6 +47,7 @@ int main()
         //Defining the starting body of the snake, using deque so we can operate on both the start and the end
         //of the snake.
         std::deque<Vector2> body = {Vector2{5,9}, Vector2{6,9}, Vector2{7,9}};
+        Vector2 direction = {0, 0};
 
         void Draw()
         {
@@ -37,6 +58,12 @@ int main()
                 Rectangle rectangle = Rectangle(body[i].x * cellSize, body[i].y * cellSize, cellSize, cellSize);
                 DrawRectangleRounded(rectangle, 0.5, 1, darkGreen);
             }
+        }
+
+        void Update()
+        {
+            body.pop_back();
+            body.push_front(Vector2Add(body[0], direction));
         }
 
     };
@@ -104,6 +131,7 @@ int main()
     //Setting the window refresh rate to 60 frames per second.
     SetTargetFPS(60);
 
+    //Game loop
     while(!WindowShouldClose())
     {
 
@@ -112,9 +140,12 @@ int main()
         ClearBackground(green);
 
         //Event handling
-
+        std::cout << GetTime() << std::endl;
+         
 
         //Update positiong / Collisions 
+        snake.Update();
+
 
         //Drawing
         food.Draw();   
