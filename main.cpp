@@ -13,25 +13,25 @@ float cellSize = 30.0f;
 float cellCount = 25.0f;
 
 bool renderGrid = false;
+float lastUpdateTime = 0;
+
+
+//Game variables
+int score = 0;
 
 Color green = {173, 204, 96, 255};
 Color darkGreen = {43, 51, 24, 255};
 
-void await(float time)
+bool EventTriggered(float timePassed)
 {
-    int timeDifference = GetTime();
-    bool goOut = false;
-
-    while(goOut = false)
+    float currentTime = GetTime();
+    
+    if(currentTime - lastUpdateTime >= timePassed)
     {
-        float b = GetTime();
-
-        if(b - timeDifference >= time)
-        {
-            timeDifference = GetTime();
-            goOut = true;
-        }
+        lastUpdateTime = GetTime();
+        return true;
     }
+    return false;
 }
 
 
@@ -47,7 +47,7 @@ int main()
         //Defining the starting body of the snake, using deque so we can operate on both the start and the end
         //of the snake.
         std::deque<Vector2> body = {Vector2{5,9}, Vector2{6,9}, Vector2{7,9}};
-        Vector2 direction = {0, 0};
+        Vector2 direction = {1, 0};
 
         void Draw()
         {
@@ -70,6 +70,7 @@ int main()
 
     class Food
     {
+        private:
         //Vector2 position, variable used for the position of the object, since  working on a 2d space
         //Using a Vector2 which contains an X and Y coord.
         Vector2 position;
@@ -120,11 +121,57 @@ int main()
             float y = GetRandomValue(0, cellCount - 1);
             return Vector2{x,y};
         }
+
+        Vector2 GetPosition()
+        {
+            return position;
+        }
+
+        void SetPositionX(float value)
+        {
+            position.x = value;
+        }
+
+        void SetPositionY(float value)
+        {
+            position.y = value;
+        }
+
+        void SetPosition(Vector2 value)
+        {
+            position = value;
+        }
     };
 
-    Food food;
+    class Game
+    {
+        public:
 
-    Snake snake;
+        Food food = Food();
+        Snake snake = Snake();
+
+        void Draw()
+        {
+            food.Draw();
+            snake.Draw();
+        }
+
+        void Update()
+        {
+            snake.Update();
+        }
+
+        void CheckCollisionWithFood()
+        {
+            if(Vector2Equals(snake.body[0], food.GetPosition()))
+            {
+                food.SetPosition(food.GenerateRandomPos());
+                score++;
+            }
+        }
+    };
+
+    Game game;
 
 
 
@@ -140,16 +187,45 @@ int main()
         ClearBackground(green);
 
         //Event handling
-        std::cout << GetTime() << std::endl;
+        /* std::cout << GetTime() << std::endl; */
          
 
-        //Update positiong / Collisions 
-        snake.Update();
+        //Update positions
+        if(EventTriggered(0.2f))
+        {
+            game.Update();
+        } 
+        
+        if((IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) && game.snake.direction.y != 1)
+        {
+            game.snake.direction = {0,-1};
+            std::cout << "KEY PRESSED";
+        }
+        if((IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) && game.snake.direction.y != -1)
+        {
+            game.snake.direction = {0,1};
+            std::cout << "KEY PRESSED";
+        }
+        if((IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) && game.snake.direction.x != -1)
+        {
+            game.snake.direction = {1,0};
+            std::cout << "KEY PRESSED";
+        }
+        if((IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) && game.snake.direction.x != 1)
+        {
+            game.snake.direction = {-1,0};
+            std::cout << "KEY PRESSED";
+        }
+
+        //Check collisions
+        game.CheckCollisionWithFood();
 
 
         //Drawing
-        food.Draw();   
-        snake.Draw();
+        DrawText(TextFormat("%i", score), screen_width/2, screen_heigth/10, 50, darkGreen);
+
+        game.Draw();
+
         if(renderGrid == true)
         {
             for(int i = 0; i < cellCount; i++)
